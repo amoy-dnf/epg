@@ -26,6 +26,9 @@ jobs:
       - name: Reset repository history
         run: |
           cd gitee-repo
+          # 登录 Gitee
+          git config user.name "${{ secrets.GITEE_USER_NAME }}"
+          git config user.email "${{ secrets.GITEE_USER_EMAIL }}"
           # 创建孤立分支（不含历史）
           git checkout --orphan clean
           # 保留当前文件（如果仓库为空可忽略错误）
