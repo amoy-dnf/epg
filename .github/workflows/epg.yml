@@ -25,7 +25,7 @@ jobs:
           mkdir -p epg
           FAILED_FILES=""
 
-          cat files.json | jq -r 'to_entries[] | "\(.key) \(.value)"' | while read -r filename url; do
+          while read -r filename url; do
             echo "Downloading $filename from $url"
 
             xml_file="epg/$filename"
@@ -78,7 +78,7 @@ jobs:
             else
               rm -f "$xml_tmp"
             fi
-          done
+          done  < <(jq -r 'to_entries[] | "\(.key) \(.value)"' files.json)
 
           if [ -n "$FAILED_FILES" ]; then
             echo "HAS_FAILED=true" >> $GITHUB_ENV
