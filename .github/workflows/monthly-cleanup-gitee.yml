@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1️⃣：配置 SSH 连接 Gitee
+      # Step 1：配置 SSH 连接 Gitee
       - name: Setup SSH for Gitee
         run: |
           mkdir -p ~/.ssh
@@ -18,11 +18,27 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan gitee.com >> ~/.ssh/known_hosts
 
-      # Step 2️⃣：克隆 Gitee 仓库
+      # Step 2：克隆 Gitee 仓库
       - name: Clone Gitee repository
         run: git clone git@gitee.com:taksssss/tv.git gitee-repo
 
-      # Step 3️⃣：彻底清理历史并压缩
+      # Step 3：下载并执行 git-repo-clean
+      - name: Run git-repo-clean
+        run: |
+          cd gitee-repo
+
+          echo "⬇️ 下载 git-repo-clean..."
+          curl -L -o git-repo-clean.tar \
+          https://gitee.com/oschina/git-repo-clean/releases/download/v1.4.2/git-repo-clean-1.4.2-Linux-64.tar
+
+          tar -xf git-repo-clean.tar
+
+          echo "🧹 执行仓库瘦身..."
+          CLEAN_BIN=$(find . -name git-repo-clean | head -n 1)
+          chmod +x "$CLEAN_BIN"
+          "$CLEAN_BIN" --force
+
+      # Step 4：彻底清理历史并压缩
       - name: Reset repository history and cleanup
         run: |
           cd gitee-repo
@@ -47,7 +63,7 @@ jobs:
 
           echo "✅ 清理完成并推送成功。仓库历史已重置。"
 
-      # Step 4️⃣：发送企业微信通知（可选）
+      # Step 5：发送企业微信通知（可选）
       - name: Send WeCom notification
         if: success()
         run: |
