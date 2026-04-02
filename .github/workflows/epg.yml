@@ -55,10 +55,25 @@ jobs:
             HTTP_CODE=$(curl -k --retry 5 \
               -w "%{http_code}" -o "$raw_tmp" "$request_url" || echo 0)
 
-            # HTTP 状态码判断
+            # HTTP 状态码判断（带24小时容错）
             if [ "$HTTP_CODE" != "200" ]; then
-              echo "下载失败：$filename（HTTP $HTTP_CODE）"
-              FAILED_FILES="$FAILED_FILES\n$filename（HTTP $HTTP_CODE）"
+              LAST_COMMIT_TS=$(git log -1 --format=%ct -- "$xml_file" 2>/dev/null || echo 0)
+              NOW_TS=$(date +%s)
+            
+              if [ "$LAST_COMMIT_TS" -gt 0 ]; then
+                HOURS=$(( (NOW_TS - LAST_COMMIT_TS) / 3600 ))
+              else
+                HOURS=9999
+              fi
+            
+              if [ "$HOURS" -le 24 ]; then
+                echo "下载失败（忽略）：$filename（HTTP $HTTP_CODE，${HOURS}小时内更新过）"
+                rm -f "$raw_tmp"
+                continue
+              fi
+            
+              echo "下载失败：$filename（HTTP $HTTP_CODE，已${HOURS}小时未更新）"
+              FAILED_FILES="$FAILED_FILES\n$filename（HTTP $HTTP_CODE，已${HOURS}小时未更新）"
               rm -f "$raw_tmp"
               continue
             fi
