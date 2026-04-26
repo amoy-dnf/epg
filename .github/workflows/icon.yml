@@ -92,7 +92,7 @@ jobs:
             if [ ! -f "$output_file" ]; then
               echo "$tvg_logo $output_file"
             fi
-          done | xargs -P 8 -n 2 bash -c 'curl -s "$0" -o "$1"'
+          done | xargs -P 8 -n 2 bash -c 'curl -sLf "$0" -o "$1"; if [ -f "$1" ]; then if ! file -b --mime-type "$1" | grep -q "^image/"; then echo "下载的内容不是有效图片，抛弃: $1"; rm -f "$1"; fi; fi'
 
       - name: Copy GDCMCCIPTV, MyUKJ and Others Icons
         run: |
@@ -106,15 +106,19 @@ jobs:
             done
           done
 
-      - name: Crop Icons
+      - name: Verify and Crop Icons
         run: |
           sudo apt-get install -y imagemagick
           for file in icon_new/*.png; do
             if [ -f "$file" ]; then
-              echo "Processing $file"
+              if ! identify "$file" > /dev/null 2>&1; then
+                echo "检测到损坏或伪装成图片的无效文件 (例如 HTML 代码)，已删除: $file"
+                rm -f "$file"
+                continue
+              fi
+              
+              echo "Processing valid image: $file"
               convert "$file" -trim -resize 600x\> "$file" || echo "Failed to process $file"
-            else
-              echo "File $file does not exist"
             fi
           done
 
