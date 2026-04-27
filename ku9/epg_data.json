@@ -2891,11 +2891,6 @@
       "name": "ITV4,"
     },
     {
-      "epgid": "J&TSTATION",
-      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/J&TSTATION.png",
-      "name": "J&TSTATION,"
-    },
-    {
       "epgid": "J2",
       "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/J2.png",
       "name": "J2,TVB J2,TVBJ2,无线J2"
@@ -8314,11 +8309,6 @@
       "epgid": "壹电影",
       "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/壹电影.png",
       "name": "壹电影,"
-    },
-    {
-      "epgid": "壹电视新闻",
-      "logo": "https://gcore.jsdelivr.net/gh/taksssss/tv/icon/壹电视新闻.png",
-      "name": "壹电视新闻,"
     },
     {
       "epgid": "壹电视电影",
