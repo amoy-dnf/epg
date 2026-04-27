@@ -21,7 +21,24 @@ jobs:
           echo "${{ secrets.GITEE_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan gitee.com >> ~/.ssh/known_hosts
-          git clone git@gitee.com:taksssss/tv.git gitee-repo
+
+          cat > ~/.ssh/config <<EOF
+          Host gitee.com
+            HostName gitee.com
+            User git
+            IdentityFile ~/.ssh/id_rsa
+            ServerAliveInterval 30
+            ServerAliveCountMax 6
+            TCPKeepAlive yes
+            StrictHostKeyChecking no
+          EOF
+
+          for i in 1 2 3 4 5; do
+            echo "Clone attempt $i..."
+            git clone --depth 1 git@gitee.com:taksssss/tv.git gitee-repo && break
+            rm -rf gitee-repo
+            sleep 10
+          done
 
       # Step 3: Copy .gz files and commit if changed
       - name: Copy .gz and commit
