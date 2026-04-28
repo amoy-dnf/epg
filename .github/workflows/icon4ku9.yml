@@ -1,9 +1,9 @@
 name: Icon Data for Ku9
 
 on:
-  schedule:
-    - cron: '0 0 * * *'
   workflow_dispatch:
+  repository_dispatch:
+    types: [icon4ku9]
 
 jobs:
   generate:
@@ -25,10 +25,28 @@ jobs:
       - name: Run script
         run: python ku9.py
 
+      - name: Check for changes
+        id: changes
+        run: |
+          git add ku9/epg_data.json ku9/alias.json ku9/icon.zip
+          if git diff --cached --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Commit and push changes
+        if: steps.changes.outputs.changed == 'true'
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git add ku9/epg_data.json ku9/alias.json ku9/icon.zip
-          git commit -m "Update EPG and alias data" || echo "No changes to commit"
+          git commit -m "Update EPG and alias data"
           git push
+
+      - name: Repository Dispatch
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.ACCESS_TOKEN }}
+          repository: taksssss/iptv-tool
+          event-type: synciconlist
