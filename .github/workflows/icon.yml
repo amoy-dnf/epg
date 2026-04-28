@@ -106,6 +106,17 @@ jobs:
             done
           done
 
+      - name: Clone vircloud/TVLogo
+        run: |
+          git clone --depth 1 https://github.com/vircloud/TVLogo.git
+          for file in TVLogo/*.png; do
+            filename=$(basename "$file" .png | tr '[:lower:]' '[:upper:]' | sed -E 's/[ _-]//g; s/频道$|頻道$|电视台$|電視台$|電視臺$|台$|臺$//g')
+              if [ ! -f "icon_new/${filename}.png" ]; then
+                echo "Copying $filename to icon_new"
+                cp "$file" "icon_new/${filename}.png"
+            fi
+          done
+
       - name: Verify and Crop Icons
         run: |
           sudo apt-get install -y imagemagick
@@ -130,13 +141,6 @@ jobs:
               cp "$new_file" "icon/$filename"
             fi
           done
-
-          # for old_file in icon/*.png; do
-          #   filename=$(basename "$old_file")
-          #   if [ ! -f "icon_new/$filename" ]; then
-          #     rm "$old_file"
-          #   fi
-          # done
 
       - name: Generate iconList_default.json
         run: |
